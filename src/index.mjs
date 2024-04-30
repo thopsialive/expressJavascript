@@ -6,7 +6,12 @@ let PORT = process.env.PORT || 3000; // 3000 is assigned if env variable is unde
 const mockUsers = [
     {id: 1, userName: "Andre Johnson Jr.", displayName: "Junior"},
     {id: 2, userName: "Jack Johnson", displayName: "Jack"},
-    {id: 3, userName: "Andre Johnson Sr.", displayName: "Dre"}
+    {id: 3, userName: "Andre Johnson Sr.", displayName: "Dre"},
+    {id: 4, userName: "Dr. Rainbow Johnson", displayName: "Bow"},
+    {id: 5, userName: "Zoe Johnson", displayName: "Zozo"},
+    {id: 6, userName: "Diane Johnson", displayName: "Diane Johnson"},
+    {id: 7, userName: "Martin Payne", displayName: "WHAA-DUP!"},
+    {id: 8, userName: "Anson", displayName: "anson"}
 ];
 
 // 1.2 Intro & Setup
@@ -39,7 +44,19 @@ app.get('/', (request, response) => { // app.get("route", callBackFn i.e. (reque
 
 // 2.2 lets define another route
 app.get('/api/users', (request, response) => { // 'http://localhost:3000/api/users' in browser
-    response.send(mockUsers); // browser output is this array
+    // 4.1 Query Parameters
+    console.log(request.query); 
+    // 'http://localhost:3000/api/users?filter=payne' in browser, assuming filter is based on userName, terminal output is {filter: 'payne'}
+
+
+    // 'http://localhost:3000/api/users?filter=userMame&value=johnson' in browser, sets filter to userName, with 'johnson' value in it, terminal output is {filter: 'userName', value: 'johnson'}
+    const {query: {filter, value},} = request;
+    // (A) if both these values are DEFINED
+    if (filter && value) return response.send(
+        mockUsers.filter((user) => user[filter].includes(value))
+    );
+    // (B) if one or both these values are UNDEFINED
+    return response.send(mockUsers); // browser output is this array
 });
 
 // 2.3 lets define one more route
@@ -58,11 +75,11 @@ app.get('/api/products', (request, response) => { // 'http://localhost:3000/api/
 */
 
 app.get("/api/users/:id", (request, response) => {
-    console.log(request.params); //'http:localhost:3000/api/users/X' in browser leads to {id: 'X'} in terminal
+    console.log(request.params); //'http://localhost:3000/api/users/X' in browser leads to {id: 'X'} in terminal
     const parsedId = parseInt(request.params.id); // convert string to integer
     console.log(parsedId);
 
-    // NaN is 'not a number' e.g. 'http:localhost:3000/api/users/yes' in browser
+    // NaN is 'not a number' e.g. 'http://localhost:3000/api/users/yes' in browser
     // (A) if NaN is inputed in route address
     if (isNaN(parsedId)) return response.status(400).send({msg : 'Bad Request. Invalid ID.'});
 
@@ -82,3 +99,16 @@ app.get("/api/users/:id", (request, response) => {
     404 => Not Found
     500 => Internal Server Error
 */
+
+
+// 4. Query Parameters
+
+/*
+    http://localhost:3000/products?key=value&key2=values2
+    the above is a query string
+    
+    query params work form one page to another, i.e. data being passed between these pages
+    
+    e.g. wanting to sort all mockUsers in alphabetical order OR filtering out users without an 'a' in their userName field
+*/
+
