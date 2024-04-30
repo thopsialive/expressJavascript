@@ -2,6 +2,10 @@
 import express, { request, response } from 'express';
 
 const app = express();
+
+// 5. POST Requests: Register Middleware for linking post request to json type of data
+app.use(express.json());
+
 let PORT = process.env.PORT || 3000; // 3000 is assigned if env variable is undefined
 const mockUsers = [
     {id: 1, userName: "andre johnson jr.", displayName: "junior"},
@@ -64,6 +68,31 @@ app.get('/api/users', (request, response) => {
     }
 });
 
+// 5. Post HTTP Requests
+
+/*
+    if you want to save data in the background? e.g. users filling out a form
+    POST REQUESTS
+
+    could use Postman
+    we'll use Thunder Client, vs-code extension, a REST API tool allowing us to make API calls to server
+    Thunder Icon > New Request button > GET > url: localhost:3000/api/users > click Send button > should get normal results
+
+    Thunder Icon > New Request button > GET > url: localhost:3000/api/users > Body tab > JSON fill in {"userName":"david", "displayName" : "Man After God's Heart"} > 
+    index.mjs > push this new data to the mockUser's array
+    Thunder Client > click Send button > should get json data saved
+    
+*/
+
+app.post('/api/users', (request, response) => {
+    console.log(request.body);
+    const { body } = request;
+    const newUser = {id: mockUsers[mockUsers.length-1].id + 1, ...body };
+    mockUsers.push(newUser);
+    return response.status(201).send(newUser);
+});
+
+
 // 2.3 lets define one more route
 app.get('/api/products', (request, response) => { // 'http://localhost:3000/api/products' in browser
     response.send([
@@ -97,9 +126,10 @@ app.get("/api/users/:id", (request, response) => {
     return response.send(findUser);
 });
 
-/* Statues
+/* Status Codes
     200 => Ok
-    400 => Bad Request   
+    201 => Post Resource Created
+    400 => Bad Request  
     403 => Forbidden
     404 => Not Found
     500 => Internal Server Error
@@ -116,4 +146,5 @@ app.get("/api/users/:id", (request, response) => {
     
     e.g. wanting to sort all mockUsers in alphabetical order OR filtering out users without an 'a' in their userName field
 */
+
 
