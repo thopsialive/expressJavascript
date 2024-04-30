@@ -1,5 +1,5 @@
 1. Question
-#################
+############
 
 Why is the mockUsers  array not showing up in the browser? i just get "Cannot GET /api/users"? This is the url i use: http://localhost:3000/api/users
 
@@ -26,11 +26,107 @@ app.get('./api/users', (request, response) => {
 
 
 1. Answer
-############
+##########
 
 The issue is with the path specified in your app.get method. You should use /api/users instead of ./api/users. The dot . at the beginning of ./api/users indicates the current directory, which is not what you want in this case. 
 
 Here's the corrected code:
 app.get('/api/users', (request, response) => {
     response.send(mockUsers);
+});
+
+
+#######################################################################################################################################
+
+2. Question
+############
+
+error  message:
+ReferenceError: filter is not defined
+
+code:
+//'http://localhost:3000/api/users?filter=userName&value=an' into browser
+app.get('/api/users', (request, response) => {
+    console.log(request.query); // outputs {filter: 'userName', value: 'an'} on terminal
+    
+    if (filter && value) {
+        return response.send(
+            mockUsers.filter((user) => user[filter].includes(value))
+        );
+    } else {
+        return response.status(400).send("Missing filter or value parameter");
+    }
+});
+
+2. Answer
+##########
+
+need to define the filter and value properties
+
+corrected code:
+//'http://localhost:3000/api/users?filter=userName&value=an' into browser
+app.get('/api/users', (request, response) => {
+    console.log(request.query); // outputs {filter: 'userName', value: 'an'} on terminal
+    const { filter, value } = request.query;
+    console.log(request.query);
+    
+    if (filter && value) {
+        return response.send(
+            mockUsers.filter((user) => user[filter].includes(value))
+        );
+    } else {
+        return response.status(400).send("Missing filter or value parameter");
+    }
+});
+
+
+#######################################################################################################################################
+
+3. Question
+############
+
+the entire mockUsers array is returned on the browser, instead of the filtered version
+
+error message:
+Error [ERR_HTTP_HEADERS_SENT]: Cannot set headers after they are sent to the client
+
+current code:
+//'http://localhost:3000/api/users?filter=userName&value=an' into browser
+app.get('/api/users', (request, response) => {
+    response.send(mockUsers);
+    
+    console.log(request.query); // outputs {filter: 'userName', value: 'an'} on terminal
+    const { filter, value } = request.query;
+    console.log(request.query);
+    
+    if (filter && value) {
+        return response.send(
+            mockUsers.filter((user) => user[filter].includes(value))
+        );
+    } else {
+        return response.status(400).send("Missing filter or value parameter");
+    }
+});
+
+2. Answer
+##########
+
+Error occurs because your code is trying to send a response multiple times within the same request.
+
+corrected code:
+//'http://localhost:3000/api/users?filter=userName&value=an' into browser
+app.get('/api/users', (request, response) => {
+    response.send(mockUsers);
+    
+    console.log(request.query); // outputs {filter: 'userName', value: 'an'} on terminal
+    const { filter, value } = request.query;
+    console.log(request.query);
+    
+    if (filter && value) {
+        return response.send(
+            mockUsers.filter((user) => user[filter].includes(value))
+        );
+    } else {
+        return response.status(400).send("Missing filter or value parameter");
+    }
 });

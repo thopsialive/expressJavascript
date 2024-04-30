@@ -4,14 +4,14 @@ import express, { request, response } from 'express';
 const app = express();
 let PORT = process.env.PORT || 3000; // 3000 is assigned if env variable is undefined
 const mockUsers = [
-    {id: 1, userName: "Andre Johnson Jr.", displayName: "Junior"},
-    {id: 2, userName: "Jack Johnson", displayName: "Jack"},
-    {id: 3, userName: "Andre Johnson Sr.", displayName: "Dre"},
-    {id: 4, userName: "Dr. Rainbow Johnson", displayName: "Bow"},
-    {id: 5, userName: "Zoe Johnson", displayName: "Zozo"},
-    {id: 6, userName: "Diane Johnson", displayName: "Diane Johnson"},
-    {id: 7, userName: "Martin Payne", displayName: "WHAA-DUP!"},
-    {id: 8, userName: "Anson", displayName: "anson"}
+    {id: 1, userName: "andre johnson jr.", displayName: "junior"},
+    {id: 2, userName: "jack johnson", displayName: "jack"},
+    {id: 3, userName: "andre johnson sr.", displayName: "dre"},
+    {id: 4, userName: "dr. rainbow johnson", displayName: "bow"},
+    {id: 5, userName: "zoe johnson", displayName: "zozo"},
+    {id: 6, userName: "diane johnson", displayName: "diane johnson"},
+    {id: 7, userName: "martin payne", displayName: "whaa-dup!"},
+    {id: 8, userName: "anson", displayName: "anson"}
 ];
 
 // 1.2 Intro & Setup
@@ -43,36 +43,25 @@ app.get('/', (request, response) => { // app.get("route", callBackFn i.e. (reque
 });
 
 // 2.2 lets define another route
-/*
-app.get('/api/users', (request, response) => { // 'http://localhost:3000/api/users' in browser
-    // 4.1 Query Parameters
-    console.log(request.query); 
-    // 'http://localhost:3000/api/users?filter=payne' in browser, assuming filter is based on userName, terminal output is {filter: 'payne'}
-
-
-    // 'http://localhost:3000/api/users?filter=userMame&value=johnson' in browser, sets filter to userName, with 'johnson' value in it, terminal output is {filter: 'userName', value: 'johnson'}
-    const {query: {filter, value},} = request;
-    // (A) if both these values are DEFINED
-    if (filter && value) return response.send(
-        mockUsers.filter((user) => user[filter].includes(value))
-    );
-    // (B) if one or both these values are UNDEFINED
-    return response.send(mockUsers); // browser output is this array
-});
-*/
-
 app.get('/api/users', (request, response) => {
-    response.send(mockUsers);
 
-    //Browser INPUT: http://localhost:3000/api/users?filter=an
+    // 4.1 Query Parameters
+
+    //Browser INPUT: http://localhost:3000/api/users?filter=userName&value=johnson
     console.log(request.query);
-    //Terminal OUTPUT: {filter: 'an'}
+    //Terminal OUTPUT: {filter: 'userName', value: 'johnson'}
 
-    //Browser INPUT: http://localhost:3000/api/users?filter=userName&value=an
+    //Browser INPUT: http://localhost:3000/api/users?filter=userName&value=johnson
+    const {filter, value} = request.query
     if (filter && value) {
-        return
+        return response.send(
+            mockUsers.filter((user) => user[filter].includes(value))
+        );
+        //Browser OUTPUT: filtered mockUsers array
+    } else {
+        return response.send(mockUsers);
+        //Browser OUTPUT: full mockUsers array
     }
-    
 });
 
 // 2.3 lets define one more route
