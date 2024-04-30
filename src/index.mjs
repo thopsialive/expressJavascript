@@ -3,6 +3,21 @@ import express, { request, response } from 'express';
 
 const app = express();
 let PORT = process.env.PORT || 3000; // 3000 is assigned if env variable is undefined
+const mockUsers = [
+    {id: 1, userName: "Andre Johnson Jr.", displayName: "Junior"},
+    {id: 2, userName: "Jack Johnson", displayName: "Jack"},
+    {id: 3, userName: "Andre Johnson Sr.", displayName: "Dre"}
+];
+
+// 1.2 Intro & Setup
+app.listen(PORT, () => {
+    console.log(`Running on Port ${PORT}`);
+    // 'npm run start:dev' in terminal
+    // terminal output is 'Running on Port 3000'
+
+    // 'http://localhost:3000' in browser
+    // browser ouput is 'Cannot Get /' b/c we dont have a route registered yet
+});
 
 
 // 2. GET Requests
@@ -24,10 +39,7 @@ app.get('/', (request, response) => { // app.get("route", callBackFn i.e. (reque
 
 // 2.2 lets define another route
 app.get('/api/users', (request, response) => { // 'http://localhost:3000/api/users' in browser
-    response.send([
-        {id: 1, userName: "Andre Johnson Jr.", displayName: "Junior"},
-        {id: 2, userName: "Jack Johnson", displayName: "Jack"},
-        {id: 3, userName: "Andre Johnson Sr.", displayName: "Dre"}]); // browser output is this array
+    response.send(mockUsers); // browser output is this array
 });
 
 // 2.3 lets define one more route
@@ -38,12 +50,35 @@ app.get('/api/products', (request, response) => { // 'http://localhost:3000/api/
         {id: 3, name: "dried fruit", unitPrice: "18.95"}]); // browser output is this array
 });
 
-// 1.2 Intro & Setup
-app.listen(PORT, () => {
-    console.log(`Running on Port ${PORT}`);
-    // 'npm run start:dev' in terminal
-    // terminal output is 'Running on Port 3000'
+// 3. Route Parameters
 
-    // 'http://localhost:3000' in browser
-    // browser ouput is 'Cannot Get /' b/c we dont have a route registered yet
+/* 
+    what if i wanted a specific user or product, e.g. based on id?
+    ROUTE PARAMS    
+*/
+
+app.get("/api/users/:id", (request, response) => {
+    console.log(request.params); //'http:localhost:3000/api/users/X' in browser leads to {id: 'X'} in terminal
+    const parsedId = parseInt(request.params.id); // convert string to integer
+    console.log(parsedId);
+
+    // NaN is 'not a number' e.g. 'http:localhost:3000/api/users/yes' in browser
+    // (A) if NaN is inputed in route address
+    if (isNaN(parsedId)) return response.status(400).send({msg : 'Bad Request. Invalid ID.'});
+
+    const findUser = mockUsers.find((user) => user.id === parsedId);
+
+    // (B) if the user does not exist (i.e. parsedID is not found in users array)
+    if (!findUser) return response.sendStatus(404); 
+    
+    // (C) if the user is found
+    return response.send(findUser);
 });
+
+/* Statues
+    200 => Ok
+    400 => Bad Request   
+    403 => Forbidden
+    404 => Not Found
+    500 => Internal Server Error
+*/
