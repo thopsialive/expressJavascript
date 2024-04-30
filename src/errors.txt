@@ -1,0 +1,36 @@
+1. Question
+#################
+
+Why is the mockUsers  array not showing up in the browser? i just get "Cannot GET /api/users"? This is the url i use: http://localhost:3000/api/users
+
+index.mjs:
+import express, { request, response } from 'express';
+const app = express();
+let PORT = process.env.PORT || 3000;
+const mockUsers = [
+    {id: 1, userName: "Andre Johnson Jr.", displayName: "Junior"},
+    {id: 2, userName: "Jack Johnson", displayName: "Jack"},
+    {id: 3, userName: "Andre Johnson Sr.", displayName: "Dre"},
+    {id: 4, userName: "Dr. Rainbow Johnson", displayName: "Bow"},
+    {id: 5, userName: "Zoe Johnson", displayName: "Zozo"},
+    {id: 6, userName: "Diane Johnson", displayName: "Diane Johnson"},
+    {id: 7, userName: "Martin Payne", displayName: "WHAA-DUP!"},
+    {id: 8, userName: "Anson", displayName: "anson"}
+];
+app.listen(PORT, () => {
+  console.log(`Running on Port ${PORT}`)
+});
+app.get('./api/users', (request, response) => {
+    response.send(mockUsers);
+});
+
+
+1. Answer
+############
+
+The issue is with the path specified in your app.get method. You should use /api/users instead of ./api/users. The dot . at the beginning of ./api/users indicates the current directory, which is not what you want in this case. 
+
+Here's the corrected code:
+app.get('/api/users', (request, response) => {
+    response.send(mockUsers);
+});

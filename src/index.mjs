@@ -43,6 +43,7 @@ app.get('/', (request, response) => { // app.get("route", callBackFn i.e. (reque
 });
 
 // 2.2 lets define another route
+/*
 app.get('/api/users', (request, response) => { // 'http://localhost:3000/api/users' in browser
     // 4.1 Query Parameters
     console.log(request.query); 
@@ -57,6 +58,21 @@ app.get('/api/users', (request, response) => { // 'http://localhost:3000/api/use
     );
     // (B) if one or both these values are UNDEFINED
     return response.send(mockUsers); // browser output is this array
+});
+*/
+
+app.get('/api/users', (request, response) => {
+    response.send(mockUsers);
+
+    //Browser INPUT: http://localhost:3000/api/users?filter=an
+    console.log(request.query);
+    //Terminal OUTPUT: {filter: 'an'}
+
+    //Browser INPUT: http://localhost:3000/api/users?filter=userName&value=an
+    if (filter && value) {
+        return
+    }
+    
 });
 
 // 2.3 lets define one more route
