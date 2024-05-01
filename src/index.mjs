@@ -156,6 +156,11 @@ app.get("/api/users/:id", (request, response) => {
     entire upgrade of a record or resource
     e.g. {id: 1, userName: "andre johnson jr.", displayName: "junior"} BECOMES {id: 1, userName: "junior", displayName: "jr"}
     id, userName and displayName all get updated
+
+    E.g.
+    Thunder Icon > New Request button > PUT > url: localhost:3000/api/users/8 > Body tab > JSON fill in { "userName":"Hakeem Lyon", "displayName" : "Keem"} > click Send button 
+    Can check new record with GET localhost:3000/api/users/8 SEND
+
 */
 
 app.put("/api/users/:id", (request, response) => {
@@ -169,7 +174,7 @@ app.put("/api/users/:id", (request, response) => {
     );
     if(findUserIndex === -1) return response.sendStatus(404); // Status code: Not Found
 
-    mockUsers[findUserIndex] = { id: parsedId, ...body};
+    mockUsers[findUserIndex] = { id: parsedId, ...body}; // update all record fields
     return response.sendStatus(200); // Status code: Ok
 });
 
@@ -179,7 +184,28 @@ app.put("/api/users/:id", (request, response) => {
     partial updrage of a record
     e.g. {id: 1, userName: "andre johnson jr.", displayName: "junior"} BECOMES {id: 1, userName: "andre johnson jr.", displayName: "junior123"},
     only a part of the displayName was updated
+
+    E.g.
+    Thunder Icon > New Request button > PATCH > url: localhost:3000/api/users/1 > Body tab > JSON fill in { "displayName":"Junior"} > click Send button 
+    Can check new record with GET localhost:3000/api/users/1 SEND
+
 */
+
+app.patch("/api/users/:id", (request, response) => {
+    const { body, params: {id} } = request;
+
+    const parsedId = parseInt(id);
+    if (isNaN(parsedId)) return response.sendStatus(400); // Status code: Bad Request
+
+    const findUserIndex = mockUsers.findIndex(
+        (user) => user.id === parsedId // automatically returns -1 if user.id !=== parsedId, so the id wasn't found
+    );
+    if(findUserIndex === -1) return response.sendStatus(404); // Status code: Not Found
+
+    mockUsers[findUserIndex] = { ...mockUsers[findUserIndex], ...body}; // {...keep current record data ...overide current record fields, but not all of them}
+    return response.sendStatus(200); // Status code: Ok
+});
+
 
 // 8. DELETE Requests
 
