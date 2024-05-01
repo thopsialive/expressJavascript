@@ -1,3 +1,5 @@
+// 'npm run start:dev' in terminal
+
 // 1.1 Intro and Setup
 import express, { request, response } from 'express';
 
@@ -148,3 +150,39 @@ app.get("/api/users/:id", (request, response) => {
 */
 
 
+// 6. PUT Requests
+
+/*
+    entire upgrade of a record or resource
+    e.g. {id: 1, userName: "andre johnson jr.", displayName: "junior"} BECOMES {id: 1, userName: "junior", displayName: "jr"}
+    id, userName and displayName all get updated
+*/
+
+app.put("/api/users/:id", (request, response) => {
+    const { body, params: {id} } = request;
+
+    const parsedId = parseInt(id);
+    if (isNaN(parsedId)) return response.sendStatus(400); // Status code: Bad Request
+
+    const findUserIndex = mockUsers.findIndex(
+        (user) => user.id === parsedId // automatically returns -1 if user.id !=== parsedId
+    );
+    if(findUserIndex === -1) return response.sendStatus(404); // Status code: Not Found
+
+    mockUsers[findUserIndex] = { id: parsedId, ...body};
+    return response.sendStatus(200); // Status code: Ok
+});
+
+// 7. PATCH Requests
+
+/* 
+    partial updrage of a record
+    e.g. {id: 1, userName: "andre johnson jr.", displayName: "junior"} BECOMES {id: 1, userName: "andre johnson jr.", displayName: "junior123"},
+    only a part of the displayName was updated
+*/
+
+// 8. DELETE Requests
+
+/*
+    used to delete records from the database
+*/
