@@ -3,6 +3,9 @@
 // 1.1 Intro and Setup
 import express, { request, response } from 'express';
 
+// 10.1 Validation
+import { query, validationResult, body } from 'express-validator';
+
 const app = express();
 
 // 5. POST Requests: Register Middleware for linking post request to json type of data
@@ -91,26 +94,32 @@ app.get('/',
 );
 
 // 2.2 lets define another route
-app.get('/api/users', (request, response) => {
+app.get('/api/users', 
+    // 10.2 Validation chain, passed in as middleware
+    query('filter').isString().withMessage('Must be a string input').notEmpty().withMessage('Must not be empty').isLength({ min: 3, max: 10}).withMessage('Must be at within 3-10 characters'), 
+    (request, response) => {
+        const result = validationResult(request); // extracts validation errors from request object
+        console.log(result);
 
-    // 4.1 Query Parameters
+        // 4.1 Query Parameters
 
-    //Browser INPUT: http://localhost:3000/api/users?filter=userName&value=johnson
-    console.log(request.query);
-    //Terminal OUTPUT: {filter: 'userName', value: 'johnson'}
+        //Browser INPUT: http://localhost:3000/api/users?filter=userName&value=johnson
+        console.log(request.query);
+        //Terminal OUTPUT: {filter: 'userName', value: 'johnson'}
 
-    //Browser INPUT: http://localhost:3000/api/users?filter=userName&value=johnson
-    const {filter, value} = request.query
-    if (filter && value) {
-        return response.send(
-            mockUsers.filter((user) => user[filter].includes(value))
-        );
-        //Browser OUTPUT: filtered mockUsers array
-    } else {
-        return response.send(mockUsers);
-        //Browser OUTPUT: full mockUsers array
+        //Browser INPUT: http://localhost:3000/api/users?filter=userName&value=johnson
+        const {filter, value} = request.query
+        if (filter && value) {
+            return response.send(
+                mockUsers.filter((user) => user[filter].includes(value))
+            );
+            //Browser OUTPUT: filtered mockUsers array
+        } else {
+            return response.send(mockUsers);
+            //Browser OUTPUT: full mockUsers array
+        }
     }
-});
+);
 
 // 5. Post HTTP Requests
 
@@ -128,13 +137,26 @@ app.get('/api/users', (request, response) => {
     
 */
 
-app.post('/api/users', (request, response) => {
-    console.log(request.body);
-    const { body } = request;
-    const newUser = {id: mockUsers[mockUsers.length-1].id + 1, ...body };
-    mockUsers.push(newUser);
-    return response.status(201).send(newUser);
-});
+app.post('/api/users', 
+        // 10.3 Validation w/ body function passed in as middleware
+        [body('userName')
+            .notEmpty().withMessage('Username cannot be empty.')
+            .isLength({ min: 5, max: 32}).withMessage('Username must be within 5-32 characters.')
+            .isString().withMessage('Username must be a string!'),
+        body('displayName').notEmpty().withMessage('Displayname cannot be empty.')], 
+        (request, response) => {
+            const result = validationResult(request);
+            console.log(result);
+            // check for errors with the result object 
+            if (!result.isEmpty()) return response.status(400).send({ errors: result.array() });
+
+            console.log(request.body);
+            const { body } = request;
+            const newUser = {id: mockUsers[mockUsers.length-1].id + 1, ...body };
+            mockUsers.push(newUser);
+            return response.status(201).send(newUser);
+        }
+);
 
 
 // 2.3 lets define one more route
@@ -267,5 +289,3 @@ app.delete("/api/users/:id", resolveIndexByUserId, (request, response) => {
     npm i express-validator
     npm run start:dev
  */
-
-//2:17 minutes in
