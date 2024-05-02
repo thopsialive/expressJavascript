@@ -8,6 +8,39 @@ const app = express();
 // 5. POST Requests: Register Middleware for linking post request to json type of data
 app.use(express.json());
 
+// 9. Middleware
+const logggingMiddleware = (request, response, next) => {
+    console.log(`${request.method} - ${request.url}`);
+    next();
+};
+// 9.1 Global Middleware
+/*
+app.use(
+    logggingMiddleware,
+    (request, response, next) => {
+        console.log("This is middleware, within the loggingMiddleware middleware.");
+        next(); // DONT FORGET TO CALL 'next()'
+    }
+);
+*/
+// middleware is a request handler, therefore must have request, response and next callback functions in it
+const resolveIndexByUserId = (request, response, next) => {
+    const { body, params: {id} } = request;
+    const parsedId = parseInt(id);
+    if (isNaN(parsedId)) return response.sendStatus(400); // Status code: Bad Request
+    const findUserIndex = mockUsers.findIndex(
+        (user) => user.id === parsedId // automatically returns -1 if user.id !=== parsedId
+    );
+    if(findUserIndex === -1) return response.sendStatus(404); // Status code: Not Found
+    /*
+    this next line is so we can pass the output of this middleware onto the next function
+    we will attach the findUserIndex property to the request object
+    */
+    request.findUserIndex = findUserIndex;
+
+    next();
+};
+
 let PORT = process.env.PORT || 3000; // 3000 is assigned if env variable is undefined
 const mockUsers = [
     {id: 1, userName: "andre johnson jr.", displayName: "junior"},
@@ -42,11 +75,20 @@ app.listen(PORT, () => {
     http requests GET, CREATE, UPDATE, DELETE, etc. the data
 */
 
-app.get('/', (request, response) => { // app.get("route", callBackFn i.e. (requestHandler, responseObject))
-    //response.send("Hello World"); // browser output is "Hello World"
-    //response.send( {msg:"Hello There!"}); // browser output is this json object
-    response.status(201).send( {msg:"Hello"}); // browser output is this json object + status change under Inspect> Network> localhost
-});
+//app.get('/', (request, response) => { // app.get("route", callBackFn i.e. (requestHandler, responseObject))
+// 9.2 Local Middleware
+app.get('/', 
+    logggingMiddleware,
+    (request, response, next) => {
+        console.log("This is the second middleware.");
+        next();
+    }, 
+    (request, response) => { // app.get("route", callBackFn i.e. (requestHandler, responseObject))
+        //response.send("Hello World"); // browser output is "Hello World"
+        //response.send( {msg:"Hello There!"}); // browser output is this json object
+        response.status(201).send( {msg:"Hello"}); // browser output is this json object + status change under Inspect> Network> localhost
+    }
+);
 
 // 2.2 lets define another route
 app.get('/api/users', (request, response) => {
@@ -110,6 +152,7 @@ app.get('/api/products', (request, response) => { // 'http://localhost:3000/api/
     ROUTE PARAMS    
 */
 
+/*
 app.get("/api/users/:id", (request, response) => {
     console.log(request.params); //'http://localhost:3000/api/users/X' in browser leads to {id: 'X'} in terminal
     const parsedId = parseInt(request.params.id); // convert string to integer
@@ -127,6 +170,16 @@ app.get("/api/users/:id", (request, response) => {
     // (C) if the user is found
     return response.send(findUser);
 });
+*/
+
+// 9.2 Local Middleware
+app.get("/api/users/:id", resolveIndexByUserId, (request, response) => {
+    const { findUserIndex } = request;
+    const findUser = mockUsers[findUserIndex];
+    if (!findUser) return response.sendStatus(404); 
+    return response.send(findUser);
+});
+
 
 /* Status Codes
     200 => Ok
@@ -163,18 +216,9 @@ app.get("/api/users/:id", (request, response) => {
 
 */
 
-app.put("/api/users/:id", (request, response) => {
-    const { body, params: {id} } = request;
-
-    const parsedId = parseInt(id);
-    if (isNaN(parsedId)) return response.sendStatus(400); // Status code: Bad Request
-
-    const findUserIndex = mockUsers.findIndex(
-        (user) => user.id === parsedId // automatically returns -1 if user.id !=== parsedId
-    );
-    if(findUserIndex === -1) return response.sendStatus(404); // Status code: Not Found
-
-    mockUsers[findUserIndex] = { id: parsedId, ...body}; // update all record fields
+app.put("/api/users/:id", resolveIndexByUserId, (request, response) => {
+    const { body, findUserIndex } = request;
+    mockUsers[findUserIndex] = { id: mockUsers[findUserIndex].id, ...body}; // update all record fields
     return response.sendStatus(200); // Status code: Ok
 });
 
@@ -191,17 +235,8 @@ app.put("/api/users/:id", (request, response) => {
 
 */
 
-app.patch("/api/users/:id", (request, response) => {
-    const { body, params: {id} } = request;
-
-    const parsedId = parseInt(id);
-    if (isNaN(parsedId)) return response.sendStatus(400); // Status code: Bad Request
-
-    const findUserIndex = mockUsers.findIndex(
-        (user) => user.id === parsedId // automatically returns -1 if user.id !=== parsedId, so the id wasn't found
-    );
-    if(findUserIndex === -1) return response.sendStatus(404); // Status code: Not Found
-
+app.patch("/api/users/:id", resolveIndexByUserId, (request, response) => {
+    const { body, findUserIndex } = request;
     mockUsers[findUserIndex] = { ...mockUsers[findUserIndex], ...body}; // {...keep current record data ...overide current record fields, but not all of them}
     return response.sendStatus(200); // Status code: Ok
 });
@@ -213,17 +248,8 @@ app.patch("/api/users/:id", (request, response) => {
     used to delete records from the database
 */
 
-app.delete("/api/users/:id", (request, response) => {
-    const { params: {id} } = request;
-
-    const parsedId = parseInt(id);
-    if (isNaN(parsedId)) return response.sendStatus(400); // Status code: Bad Request
-
-    const findUserIndex = mockUsers.findIndex(
-        (user) => user.id === parsedId // automatically returns -1 if user.id !=== parsedId, so the id wasn't found
-    );
-    if(findUserIndex === -1) return response.sendStatus(404); // Status code: Not Found
-
+app.delete("/api/users/:id", resolveIndexByUserId, (request, response) => {
+    const { findUserIndex } = request;
     // lets remove user from array
     mockUsers.splice(findUserIndex, 1); // 1 is the delete count, so only the id record is deleted, and not everything after the id'ed record
     return response.sendStatus(200); // Status code: Ok
