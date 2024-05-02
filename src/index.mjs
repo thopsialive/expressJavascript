@@ -254,3 +254,18 @@ app.delete("/api/users/:id", resolveIndexByUserId, (request, response) => {
     mockUsers.splice(findUserIndex, 1); // 1 is the delete count, so only the id record is deleted, and not everything after the id'ed record
     return response.sendStatus(200); // Status code: Ok
 });
+
+// 10. Validation
+
+/*
+    sometimes, the data you getExpectedBodyHash, is not the data you Receive
+    E.g. a post request, with a body of 32 characters or less
+
+    It is server-side validation.
+
+    In the terminal type:
+    npm i express-validator
+    npm run start:dev
+ */
+
+//2:17 minutes in
