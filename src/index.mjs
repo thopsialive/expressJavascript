@@ -212,3 +212,19 @@ app.patch("/api/users/:id", (request, response) => {
 /*
     used to delete records from the database
 */
+
+app.delete("/api/users/:id", (request, response) => {
+    const { params: {id} } = request;
+
+    const parsedId = parseInt(id);
+    if (isNaN(parsedId)) return response.sendStatus(400); // Status code: Bad Request
+
+    const findUserIndex = mockUsers.findIndex(
+        (user) => user.id === parsedId // automatically returns -1 if user.id !=== parsedId, so the id wasn't found
+    );
+    if(findUserIndex === -1) return response.sendStatus(404); // Status code: Not Found
+
+    // lets remove user from array
+    mockUsers.splice(findUserIndex, 1); // 1 is the delete count, so only the id record is deleted, and not everything after the id'ed record
+    return response.sendStatus(200); // Status code: Ok
+});
