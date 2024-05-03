@@ -4,7 +4,9 @@
 import express, { request, response } from 'express';
 
 // 10.1 Validation
-import { query, validationResult, body } from 'express-validator';
+import { query, validationResult, body, matchedData, checkSchema } from 'express-validator';
+//10.4 Validation Schema
+import { createUserValidationSchema } from "./utils/validationSchemas.mjs";
 
 const app = express();
 
@@ -139,20 +141,26 @@ app.get('/api/users',
 
 app.post('/api/users', 
         // 10.3 Validation w/ body function passed in as middleware
+        /*
         [body('userName')
             .notEmpty().withMessage('Username cannot be empty.')
             .isLength({ min: 5, max: 32}).withMessage('Username must be within 5-32 characters.')
             .isString().withMessage('Username must be a string!'),
-        body('displayName').notEmpty().withMessage('Displayname cannot be empty.')], 
+        body('displayName').notEmpty().withMessage('Displayname cannot be empty.')],
+        */ 
+        // 10.4 Validation Schema
+        checkSchema(createUserValidationSchema),
+
         (request, response) => {
             const result = validationResult(request);
             console.log(result);
             // check for errors with the result object 
             if (!result.isEmpty()) return response.status(400).send({ errors: result.array() });
 
-            console.log(request.body);
-            const { body } = request;
-            const newUser = {id: mockUsers[mockUsers.length-1].id + 1, ...body };
+            const data =matchedData(request); //lets grab all the data that's been validated
+            console.log(data);
+
+            const newUser = {id: mockUsers[mockUsers.length-1].id + 1, ...data };
             mockUsers.push(newUser);
             return response.status(201).send(newUser);
         }
@@ -289,3 +297,10 @@ app.delete("/api/users/:id", resolveIndexByUserId, (request, response) => {
     npm i express-validator
     npm run start:dev
  */
+
+// 11. Routers
+
+/*
+    As our application grows we can have more and more requests
+    Routers help organize 'em according to their domains, e.g. '/api/users' or '/api/products'
+*/

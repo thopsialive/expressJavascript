@@ -144,3 +144,78 @@ app.get('/api/users', (request, response) => {
 5.1. Note
 ############
 JSON requires double quotations
+
+#######################################################################################################################################
+
+[10] Validation Schema
+
+10.1 Question
+##############
+
+Im trying to use a validation schema and its not detecting an error. When i use the POST http request, at the "localhost:3000/api/users" url, with this json body input "{"userName" : "lo", "displayName" : "Man After God's Heart"}", the "username must be at least 5 characters with a max of 32 characters." error message isn't showing up. Please advise why?
+
+validationSchemas.mjs:
+export const createUserValidationSchema = {
+    userName: {
+
+        isLength: {
+            isLength: {
+                options: {
+                    min: 5,
+                    max: 32
+                }
+            },
+            errorMessage: "Username must be at least 5 characters with a max of 32 characters."
+        },
+        
+        notEmpty: {
+            errorMessage: "Username cannot be empty."
+        },
+        
+        isString: {
+            errorMessage: "Username must be a string."
+        }
+
+    },
+
+    displayName: {
+        notEmpty: {
+            errorMessage: "Display name cannot be empty."
+        }
+    }
+};
+
+index.mjs:
+import express, { request, response } from 'express';
+import { query, validationResult, body, matchedData, checkSchema } from 'express-validator';
+import { createUserValidationSchema } from "./utils/validationSchemas.mjs";
+const app = express();
+app.use(express.json());
+let PORT = process.env.PORT || 3000;
+const mockUsers = [
+    {id: 1, userName: "andre johnson jr.", displayName: "junior"},
+    {id: 2, userName: "jack johnson", displayName: "jack"},
+    {id: 3, userName: "andre johnson sr.", displayName: "dre"},
+    {id: 4, userName: "dr. rainbow johnson", displayName: "bow"},
+    {id: 5, userName: "zoe johnson", displayName: "zozo"},
+    {id: 6, userName: "diane johnson", displayName: "diane johnson"},
+    {id: 7, userName: "martin payne", displayName: "whaa-dup!"},
+    {id: 8, userName: "anson", displayName: "anson"}
+];
+app.listen(PORT, () => {
+    console.log(`Running on Port ${PORT}`);
+});
+app.post('/api/users',
+        checkSchema(createUserValidationSchema),
+        (request, response) => {
+            const result = validationResult(request);
+            console.log(result);
+            if (!result.isEmpty()) return response.status(400).send({ errors: result.array() });
+            const data =matchedData(request); 
+            console.log(data);
+            const newUser = {id: mockUsers[mockUsers.length-1].id + 1, ...data };
+            mockUsers.push(newUser);
+            return response.status(201).send(newUser);
+        }
+);
+
