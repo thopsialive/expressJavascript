@@ -5,13 +5,18 @@ import express, { request, response } from 'express';
 
 // 10.1 Validation
 import { query, validationResult, body, matchedData, checkSchema } from 'express-validator';
-//10.4 Validation Schema
+//10.4 Validation Schema Importing
 import { createUserValidationSchema } from "./utils/validationSchemas.mjs";
+// 11.1 Router Importing
+import { usersRouter } from "./routes/users.mjs"
 
 const app = express();
 
 // 5. POST Requests: Register Middleware for linking post request to json type of data
 app.use(express.json());
+
+// 11.2 Router
+app.use(usersRouter);
 
 // 9. Middleware
 const logggingMiddleware = (request, response, next) => {
@@ -95,6 +100,7 @@ app.get('/',
     }
 );
 
+/*
 // 2.2 lets define another route
 app.get('/api/users', 
     // 10.2 Validation chain, passed in as middleware
@@ -122,6 +128,11 @@ app.get('/api/users',
         }
     }
 );
+*/
+
+// 11.2 Router
+// the above is commented out, since we have the router
+
 
 // 5. Post HTTP Requests
 
