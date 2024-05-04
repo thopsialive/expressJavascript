@@ -3,20 +3,47 @@
 // 1.1 Intro and Setup
 import express, { request, response } from 'express';
 
+
+// 11.1 Router Importing
+/*
+import usersRouter from "./routes/users.mjs"
+import productsRouter from "./routes/products.mjs"
+*/
+//OR
+// 11.4 Barrel Routers File
+import routes from "./routes/index.mjs"
+
+// 11.2 Users Router
+// the below is commented out, since we have the router
+/*
 // 10.1 Validation
-import { query, validationResult, body, matchedData, checkSchema } from 'express-validator';
+import { 
+    query, 
+    validationResult, 
+    body, 
+    matchedData, 
+    checkSchema, 
+} from 'express-validator';
 //10.4 Validation Schema Importing
 import { createUserValidationSchema } from "./utils/validationSchemas.mjs";
-// 11.1 Router Importing
-import { usersRouter } from "./routes/users.mjs"
+import { mockUsers } from './utils/constants.mjs';
+import { resolveIndexByUserId } from './utils/middlewares.mjs';
+*/
 
 const app = express();
 
 // 5. POST Requests: Register Middleware for linking post request to json type of data
 app.use(express.json());
 
-// 11.2 Router
+/*
+// 11.2 Users Router
 app.use(usersRouter);
+// 11.3 Products Router
+app.use(productsRouter);
+*/
+//OR
+// 11.4 Barrel Routers File
+app.use(routes);
 
 // 9. Middleware
 const logggingMiddleware = (request, response, next) => {
@@ -33,7 +60,11 @@ app.use(
     }
 );
 */
+
+// 11.2 Users Router
+// the below is commented out, since we have the router
 // middleware is a request handler, therefore must have request, response and next callback functions in it
+/*
 const resolveIndexByUserId = (request, response, next) => {
     const { body, params: {id} } = request;
     const parsedId = parseInt(id);
@@ -42,16 +73,18 @@ const resolveIndexByUserId = (request, response, next) => {
         (user) => user.id === parsedId // automatically returns -1 if user.id !=== parsedId
     );
     if(findUserIndex === -1) return response.sendStatus(404); // Status code: Not Found
-    /*
-    this next line is so we can pass the output of this middleware onto the next function
-    we will attach the findUserIndex property to the request object
-    */
+    
+    //this next line is so we can pass the output of this middleware onto the next function
+    //we will attach the findUserIndex property to the request object
+    
     request.findUserIndex = findUserIndex;
 
     next();
 };
+*/
 
 let PORT = process.env.PORT || 3000; // 3000 is assigned if env variable is undefined
+/*
 const mockUsers = [
     {id: 1, userName: "andre johnson jr.", displayName: "junior"},
     {id: 2, userName: "jack johnson", displayName: "jack"},
@@ -62,6 +95,9 @@ const mockUsers = [
     {id: 7, userName: "martin payne", displayName: "whaa-dup!"},
     {id: 8, userName: "anson", displayName: "anson"}
 ];
+*/
+// 11.2 Users Router
+// the above is commented out, since we have the router
 
 // 1.2 Intro & Setup
 app.listen(PORT, () => {
@@ -129,8 +165,7 @@ app.get('/api/users',
     }
 );
 */
-
-// 11.2 Router
+// 11.2 Users Router
 // the above is commented out, since we have the router
 
 
@@ -150,7 +185,9 @@ app.get('/api/users',
     
 */
 
-app.post('/api/users', 
+// 11.2 Users Router
+// the below is commented out, since we have the router
+//app.post('/api/users', 
         // 10.3 Validation w/ body function passed in as middleware
         /*
         [body('userName')
@@ -160,6 +197,7 @@ app.post('/api/users',
         body('displayName').notEmpty().withMessage('Displayname cannot be empty.')],
         */ 
         // 10.4 Validation Schema
+/*
         checkSchema(createUserValidationSchema),
 
         (request, response) => {
@@ -176,8 +214,11 @@ app.post('/api/users',
             return response.status(201).send(newUser);
         }
 );
+*/
 
-
+// 11.3 Products Router
+// the above is commented out, since we have the router
+/*
 // 2.3 lets define one more route
 app.get('/api/products', (request, response) => { // 'http://localhost:3000/api/products' in browser
     response.send([
@@ -185,6 +226,7 @@ app.get('/api/products', (request, response) => { // 'http://localhost:3000/api/
         {id: 2, name: "biltong", unitPrice: "32.95"},
         {id: 3, name: "dried fruit", unitPrice: "18.95"}]); // browser output is this array
 });
+*/
 
 // 3. Route Parameters
 
@@ -213,6 +255,9 @@ app.get("/api/users/:id", (request, response) => {
 });
 */
 
+// 11.2 Users Router
+// the below is commented out, since we have the router
+/*
 // 9.2 Local Middleware
 app.get("/api/users/:id", resolveIndexByUserId, (request, response) => {
     const { findUserIndex } = request;
@@ -220,7 +265,7 @@ app.get("/api/users/:id", resolveIndexByUserId, (request, response) => {
     if (!findUser) return response.sendStatus(404); 
     return response.send(findUser);
 });
-
+*/
 
 /* Status Codes
     200 => Ok
@@ -257,11 +302,15 @@ app.get("/api/users/:id", resolveIndexByUserId, (request, response) => {
 
 */
 
+// 11.2 Users Router
+// the below is commented out, since we have the router
+/*
 app.put("/api/users/:id", resolveIndexByUserId, (request, response) => {
     const { body, findUserIndex } = request;
     mockUsers[findUserIndex] = { id: mockUsers[findUserIndex].id, ...body}; // update all record fields
     return response.sendStatus(200); // Status code: Ok
 });
+*/
 
 // 7. PATCH Requests
 
@@ -276,12 +325,15 @@ app.put("/api/users/:id", resolveIndexByUserId, (request, response) => {
 
 */
 
+// 11.2 Users Router
+// the below is commented out, since we have the router
+/*
 app.patch("/api/users/:id", resolveIndexByUserId, (request, response) => {
     const { body, findUserIndex } = request;
     mockUsers[findUserIndex] = { ...mockUsers[findUserIndex], ...body}; // {...keep current record data ...overide current record fields, but not all of them}
     return response.sendStatus(200); // Status code: Ok
 });
-
+*/
 
 // 8. DELETE Requests
 
@@ -289,12 +341,16 @@ app.patch("/api/users/:id", resolveIndexByUserId, (request, response) => {
     used to delete records from the database
 */
 
+// 11.2 Users Router
+// the below is commented out, since we have the router
+/*
 app.delete("/api/users/:id", resolveIndexByUserId, (request, response) => {
     const { findUserIndex } = request;
     // lets remove user from array
     mockUsers.splice(findUserIndex, 1); // 1 is the delete count, so only the id record is deleted, and not everything after the id'ed record
     return response.sendStatus(200); // Status code: Ok
 });
+*/
 
 // 10. Validation
 
