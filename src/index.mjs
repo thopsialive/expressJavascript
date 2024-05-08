@@ -30,10 +30,16 @@ import { mockUsers } from './utils/constants.mjs';
 import { resolveIndexByUserId } from './utils/middlewares.mjs';
 */
 
+// 12.2 Using the cookie in browser
+import cookieParser from "cookie-parser";
+
 const app = express();
 
 // 5. POST Requests: Register Middleware for linking post request to json type of data
 app.use(express.json());
+
+// 12.2 Using the cookie in browser
+app.use(cookieParser("cookieSignature")); //'app.use(cookieParser('secret'));' secret is needed for signed cookies
 
 /*
 // 11.2 Users Router
@@ -130,6 +136,10 @@ app.get('/',
         next();
     }, 
     (request, response) => { // app.get("route", callBackFn i.e. (requestHandler, responseObject))
+        // 12.1 Cookie Setup
+        response.cookie("cookieName", "chocolate", { maxAge: 60000*60, signed: true}); //this cookie will expire after 1 hour, 1minute = 60000milliseconds
+        // 12.3 Note this is now a signed cookie
+
         //response.send("Hello World"); // browser output is "Hello World"
         //response.send( {msg:"Hello There!"}); // browser output is this json object
         response.status(201).send( {msg:"Hello"}); // browser output is this json object + status change under Inspect> Network> localhost
@@ -370,4 +380,17 @@ app.delete("/api/users/:id", resolveIndexByUserId, (request, response) => {
 /*
     As our application grows we can have more and more requests
     Routers help organize 'em according to their domains, e.g. '/api/users' or '/api/products'
+*/
+
+// 12. HTTP Cookies
+
+/*
+    These are small pieces of data that the webserver sends to the browser
+    HTTP is stateless, meaning the server does not know who makes requests when they are made
+    E.g. having a user place items in a cart, cookies are used to remember that so when the user logs out then in again, their items are still in their cart
+
+    Lets Check for cookies:
+    Go to "localhost:3000" on browser > Inspect > Application tab > Cookies
+    OR
+    Thunder client > GET request > Next to "Response" there should be Cookies
 */
