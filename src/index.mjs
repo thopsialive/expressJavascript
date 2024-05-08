@@ -33,6 +33,9 @@ import { resolveIndexByUserId } from './utils/middlewares.mjs';
 // 12.2 Using the cookie in browser
 import cookieParser from "cookie-parser";
 
+// 13 Sessions Pt1.
+import session from 'express-session';
+
 const app = express();
 
 // 5. POST Requests: Register Middleware for linking post request to json type of data
@@ -40,6 +43,18 @@ app.use(express.json());
 
 // 12.2 Using the cookie in browser
 app.use(cookieParser("cookieSignature")); //'app.use(cookieParser('secret'));' secret is needed for signed cookies
+
+// 13 Sessions Pt1.
+app.use(
+    session({ 
+        secret: "password123",
+        saveUninitialized: false, // for users just visiting the site, nothing will be stored
+        resave: false,
+        cookie: {
+            maxAge: 60000*60, // milliseconds, i.e. 1hr expiry time
+        },
+    })
+);
 
 /*
 // 11.2 Users Router
@@ -136,6 +151,11 @@ app.get('/',
         next();
     }, 
     (request, response) => { // app.get("route", callBackFn i.e. (requestHandler, responseObject))
+        // 13 Sessions Pt.1
+        console.log(request.session);
+        console.log(request.sessionID); // this regenerates after every request
+        request.session.visited = true; // keeps sessionID constant
+
         // 12.1 Cookie Setup
         response.cookie("cookieName", "chocolate", { maxAge: 60000*60, signed: true}); //this cookie will expire after 1 hour, 1minute = 60000milliseconds
         // 12.3 Note this is now a signed cookie
@@ -393,4 +413,11 @@ app.delete("/api/users/:id", resolveIndexByUserId, (request, response) => {
     Go to "localhost:3000" on browser > Inspect > Application tab > Cookies
     OR
     Thunder client > GET request > Next to "Response" there should be Cookies
+*/
+
+// 13. Sessions Pt1.
+
+/*
+    Sessions represent the duration of a user on a website.
+    npm i express-session
 */

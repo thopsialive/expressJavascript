@@ -24,6 +24,18 @@ router.get(
         .isLength({ min: 3, max: 10})
         .withMessage('Must be at within 3-10 characters'), 
     (request, response) => {
+        // 13 Sessions Pt.1
+        // now we're reading the session coookie from the website after running "GET localhost:3000"
+        console.log(request.session);
+        console.log(request.session.id);
+        // now lets store this data somewhere
+        request.sessionStore.get(request.session.id, (err, sessionData) => {
+            if (err) {
+                console.log(err);
+            }
+            console.log(sessionData);
+        });
+
         const result = validationResult(request);
         console.log(result);
         const { query: { filter, value } } = request;
